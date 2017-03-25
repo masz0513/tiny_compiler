@@ -1,6 +1,6 @@
-<a href="compiler.go"><img width="731" alt="THE SUPER TINY COMPILER" src="https://cloud.githubusercontent.com/assets/952783/14413766/134c4068-ff39-11e5-996e-9452973299c2.png"/></a>
+<a href="https://github.com/thejameskyle/the-super-tiny-compiler"><img width="731" alt="THE SUPER TINY COMPILER" src="https://cloud.githubusercontent.com/assets/952783/14413766/134c4068-ff39-11e5-996e-9452973299c2.png"/></a>
 
-This is essentially just a port of [The Super Tiny Compiler][1] written in JavaScript by James Kyle.
+This is essentially just a port of [The Super Tiny Compiler](https://github.com/thejameskyle/the-super-tiny-compiler) written in JavaScript by James Kyle.
 
 ### Installation
 
