@@ -19,18 +19,19 @@ defmodule TinyCompiler.Tokenizer do
 	"""
 	
 	def tokenize(input) do
-		do_tokenize(input, [])		
+		do_tokenize(input, [])
+		|> Enum.reverse	
 	end
 
 	defp do_tokenize(<<>>, acc), do: acc
 
-	defp do_tokenize("(" <> rest, acc), do: do_tokenize(rest, acc ++ [%{type: "paren", value: "("}])
+	defp do_tokenize("(" <> rest, acc), do: do_tokenize(rest, [%{type: "paren", value: "("} | acc])
 	
-	defp do_tokenize(")" <> rest, acc), do: do_tokenize(rest, acc ++ [%{type: "paren", value: ")"}])
+	defp do_tokenize(")" <> rest, acc), do: do_tokenize(rest, [%{type: "paren", value: ")"} | acc])
 
 	defp do_tokenize(~s(") <> rest, acc) do
 		{str, rem} = parse_string(rest, {"", ""})
-		do_tokenize(rem, acc ++ [%{type: "string", value: str}])
+		do_tokenize(rem, [%{type: "string", value: str} | acc])
 	end
 
 	defp do_tokenize(<<h::utf8, rest::binary>> = input, acc) do
@@ -43,26 +44,24 @@ defmodule TinyCompiler.Tokenizer do
 		  # numbers
 		  Regex.match?(~r/[0-9]/, h_str) ->
 		  	{int_str, rem} = parse_number(input)
-		    do_tokenize(rem, acc ++ [%{type: "number", value: int_str}])
+		    do_tokenize(rem, [%{type: "number", value: int_str} | acc])
 		  # letters
 		  Regex.match?(~r/[a-z]/i, h_str) ->
 				{str, rem} = parse_function(input, {"", ""})
-				do_tokenize(rem, acc ++ [%{type: "name", value: str}])
+				do_tokenize(rem, [%{type: "name", value: str} | acc])
 		  true ->
 		  	raise "I don't know what this character is: #{h_str}"
 		end
 	end
 
-	defp parse_string(~s(") <> rest, {acc, _}), do: {acc, rest}
-	defp parse_string(<<h::utf8, rest::binary>>, {acc, _}), do: parse_string(rest, {acc <> to_string([h]), ""})
+	defp parse_string(~s(") <> rest, {acc, _}), do: {IO.iodata_to_binary(acc), rest}
+	defp parse_string(<<h::utf8, rest::binary>>, {acc, _}), do: parse_string(rest, {[acc, h], ""})
 
 	defp parse_function(<<h::utf8, rest::binary>> = rem, {acc, _}) do
-		h_str = to_string([h])
-
-		if Regex.match?(~r/[a-z]/i, h_str) do
-			parse_function(rest, {acc <> h_str, ""})
+		if Regex.match?(~r/[a-z]/i, to_string([h])) do
+			parse_function(rest, {[acc, h], ""})
 		else
-			{acc, rem}
+			{IO.iodata_to_binary(acc), rem}
 		end
 	end
 

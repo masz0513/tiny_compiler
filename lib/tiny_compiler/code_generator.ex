@@ -26,11 +26,11 @@ defmodule TinyCompiler.CodeGenerator do
 	end
 
 	defp do_generate(%{type: "CallExpression", callee: callee, arguments: arguments}, code) do
-		args = Enum.reduce(arguments, nil, fn(node, acc) ->
-			if acc == nil, do: "#{do_generate(node)}", else: "#{acc}, #{do_generate(node)}" 
+		args = Enum.reduce(arguments, "", fn(node, acc) ->
+			if acc === "", do: do_generate(node), else: [acc, ", ", do_generate(node)]
 		end)
 
-		"#{callee.name}(#{args})" <> code
+		IO.iodata_to_binary([callee.name, '(', args, ')', code])
 	end
 
 	defp do_generate(%{type: "NumberLiteral", value: value}), do: value

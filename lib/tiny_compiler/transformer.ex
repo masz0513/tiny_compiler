@@ -63,7 +63,7 @@ defmodule TinyCompiler.Transformer do
 			callee: %{type: "Identifier", name: name},
 			arguments: []
 		}
-		do_transform(params, txAst)
+		do_transform(Enum.reverse(params), txAst)
 	end
 
 	defp do_transform([%{type: "CallExpression", name: name, params: params} | t], txAst) do
@@ -72,17 +72,17 @@ defmodule TinyCompiler.Transformer do
 			callee: %{type: "Identifier", name: name},
 			arguments: []
 		}
-		subTxAst = do_transform(params, subTxAst)
-		do_transform(t, %{txAst | arguments: txAst.arguments ++ [subTxAst]})
+		subTxAst = do_transform(Enum.reverse(params), subTxAst)
+		do_transform(t, %{txAst | arguments: [subTxAst | txAst.arguments]})
 	end
 
 	defp do_transform([%{type: "NumberLiteral", value: value} | t], txAst) do
-		txAst = %{txAst | arguments: txAst.arguments ++ [%{type: "NumberLiteral", value: value}]}
+		txAst = %{txAst | arguments: [%{type: "NumberLiteral", value: value} | txAst.arguments]}
 		do_transform(t, txAst)
 	end
 
 	defp do_transform([%{type: "StringLiteral", value: value} | t], txAst) do
-		txAst = %{txAst | arguments: txAst.arguments ++ [%{type: "StringLiteral", value: value}]}
+		txAst = %{txAst | arguments: [%{type: "StringLiteral", value: value} | txAst.arguments]}
 		do_transform(t, txAst)
 	end
 end

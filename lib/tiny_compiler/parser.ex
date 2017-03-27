@@ -30,20 +30,21 @@ defmodule TinyCompiler.Parser do
 		[name_token | rest] = t
 		{params, rest} = Enum.split_while(rest, &(&1.value != ")"))
 		sub_ast = do_walk(params, %{type: "CallExpression", name: name_token.value, params: []})
-		do_walk(rest, %{ast | params: ast.params ++ [sub_ast]})
+		sub_ast = %{sub_ast | params: Enum.reverse(sub_ast.params)}
+		do_walk(rest, %{ast | params: Enum.reverse([sub_ast | ast.params])})
 	end
 
 	defp do_walk([%{type: "number", value: val} | t], ast) do
-		ast = %{ast | params: ast.params ++ [%{type: "NumberLiteral", value: val}]}
+		ast = %{ast | params: [%{type: "NumberLiteral", value: val} | ast.params]}
 		do_walk(t, ast)
 	end
 
 	defp do_walk([%{type: "string", value: val} | t], ast) do
-		ast = %{ast | params: ast.params ++ [%{type: "StringLiteral", value: val}]}
+		ast = %{ast | params: [%{type: "StringLiteral", value: val} | ast.params]}
 		do_walk(t, ast)
 	end
 
-	defp do_walk([%{type: "paren", value: ")"} | t], ast), do: do_walk(t, ast)
+	defp do_walk([%{type: "paren", value: ")"} | t], ast), do: do_walk(t, %{ast | params: Enum.reverse(ast.params)})
 
 	defp do_walk([%{type: type, value: _} | _], _), do: raise "I dont know what this type is: #{type}"
 end
